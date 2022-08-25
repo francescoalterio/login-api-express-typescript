@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Home</title>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/@picocss/pico@latest/css/pico.min.css"
+    />
+    <style>
+      .container {
+        padding: 50px 200px;
+      }
+      #posts-container {
+        width: 100%;
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        flex-direction: column;
+      }
+
+      .secondary {
+        margin-top: 40px;
+      }
+
+      article {
+        width: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <form class="create-post-container">
+        <label for="create-post">
+          Create post
+          <input type="text" name="" id="create-post" />
+        </label>
+        <button type="submit">Create post</button>
+      </form>
+      <div id="posts-container"></div>
+    </div>
+    <script>
+      const $postsContainer = document.getElementById("posts-container");
+      const addPostsToHTML = (posts) => {
+        posts.forEach((post) => {
+          const postComponent = `<article>${post.post}<button id=${post.id} class="secondary delete">Delete</button></article>`;
+          $postsContainer.innerHTML += postComponent;
+        });
+      };
+
+      fetch("http://localhost:3000/posts")
+        .then((res) => res.json())
+        .then((result) => {
+          console.log(result);
+          if (!result.isLogged)
+            window.location.href = "http://localhost:3000/login";
+          $postsContainer.innerHTML = "";
+          addPostsToHTML(result.posts);
+        });
+
+      const $form = document.querySelector("form");
+      $form.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const $input = document.querySelector("input");
+        fetch("http://localhost:3000/posts/create", {
+          method: "POST",
+          body: JSON.stringify({
+            post: $input.value,
+          }),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        })
+          .then((res) => res.json())
+          .then((result) => {
+            $postsContainer.innerHTML = "";
+            addPostsToHTML(result.posts);
+          });
+      });
+
+      $postsContainer.addEventListener("click", (event) => {
+        if (event.target.classList.contains("delete")) {
+          console.log(Number(event.target.id));
+          fetch("http://localhost:3000/posts/delete", {
+            method: "DELETE",
+            body: JSON.stringify({
+              postId: Number(event.target.id),
+            }),
+            headers: {
+              "Content-Type": "application/json",
+            },
+          })
+            .then((res) => res.json())
+            .then((result) => {
+              $postsContainer.innerHTML = "";
+              addPostsToHTML(result.posts);
+            });
+        }
+      });
+    </script>
+  </body>
+</html>

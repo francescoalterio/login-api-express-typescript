@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login</title>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/@picocss/pico@latest/css/pico.min.css"
+    />
+    <style>
+      div {
+        width: 100%;
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      form {
+        width: 500px;
+        height: 400px;
+        background-color: rgba(255, 255, 255, 0.05);
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-evenly;
+      }
+    </style>
+  </head>
+  <body>
+    <div>
+      <form>
+        <label for="input-email">
+          Email
+          <input type="email" name="email" id="input-email" />
+        </label>
+        <label for="input-password">
+          Password
+          <input type="password" name="password" id="input-password" />
+        </label>
+        <button>Login</button>
+        <div><a href="http://localhost:3000/register">Register</a></div>
+      </form>
+    </div>
+    <script>
+      const $form = document.querySelector("form");
+
+      $form.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const $email = document.getElementById("input-email");
+        const $password = document.getElementById("input-password");
+
+        fetch("http://localhost:3000/login", {
+          method: "POST",
+          body: JSON.stringify({
+            email: $email.value,
+            password: $password.value,
+          }),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        })
+          .then((res) => res.json())
+          .then((result) => {
+            if (result.isLogged) window.location.href = "http://localhost:3000";
+            else {
+              $email.value = "";
+              $email.placeholder = result.message;
+              $password.value = "";
+              $password.placeholder = result.message;
+            }
+          });
+      });
+    </script>
+  </body>
+</html>
